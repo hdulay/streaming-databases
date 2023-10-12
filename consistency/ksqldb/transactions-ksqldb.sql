@@ -73,7 +73,7 @@ ON
 EMIT CHANGES;
 
 CREATE TABLE total WITH (
-    kafka_topic='total',
+    kafka_topic='total_ksqldb',
     value_format='json') AS
 SELECT
     'foo',

@@ -45,8 +45,10 @@ CREATE TABLE total_sink (
     'connector' = 'upsert-kafka',
     'property-version' = 'universal',
     'properties.bootstrap.servers' = 'localhost:9092',
-    'topic' = 'total',
+    'topic' = 'total_flink',
     'key.format' = 'json',
     'value.format' = 'json',
     'properties.group.id' = 'total_flink'
 );
+
+INSERT INTO total_sink SELECT * FROM total;
