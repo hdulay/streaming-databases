@@ -28,19 +28,7 @@ services:
       # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
 
-  proton:
-     image: ghcr.io/timeplus-io/proton:latest
-
-  # console:
-  #   image: docker.redpanda.com/redpandadata/console:v2.3.1
-  #   entrypoint: /bin/sh
-  #   command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
-  #   environment:
-  #     CONFIG_FILEPATH: /tmp/config.yml
-  #     CONSOLE_CONFIG_FILE: |
-  #       kafka:
-  #         brokers: ["broker:29092"]
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - broker
+  arroyo:
+     image: ghcr.io/arroyosystems/arroyo-single:latest
+     ports:
+       - 8000:8000

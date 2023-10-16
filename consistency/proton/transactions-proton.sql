@@ -5,11 +5,11 @@ CREATE VIEW transactions AS
            raw:amount::double as amount, raw:ts::datetime64 as ts
     FROM transactions_s;
 
-CREATE VIEW accepted_transactions AS SELECT id FROM transactions;
+-- CREATE VIEW accepted_transactions AS SELECT id FROM transactions;
 
-CREATE VIEW outer_join_with_time AS SELECT t1.id, t2.id as other_id FROM transactions as t1 LEFT JOIN transactions as t2 ON t1.id = t2.id AND t1.ts = t2.ts;
+-- CREATE VIEW outer_join_with_time AS SELECT t1.id, t2.id as other_id FROM transactions as t1 LEFT JOIN transactions as t2 ON t1.id = t2.id AND t1.ts = t2.ts;
 
-CREATE VIEW outer_join_without_time AS SELECT t1.id, t2.id as other_id FROM (SELECT id FROM transactions) as t1 LEFT JOIN (SELECT id FROM transactions) as t2 ON t1.id = t2.id;
+-- CREATE VIEW outer_join_without_time AS SELECT t1.id, t2.id as other_id FROM (SELECT id FROM transactions) as t1 LEFT JOIN (SELECT id FROM transactions) as t2 ON t1.id = t2.id;
 
 CREATE VIEW credits AS SELECT to_account as account, sum(amount) as credits FROM transactions GROUP BY to_account;
 
@@ -17,7 +17,7 @@ CREATE VIEW debits AS SELECT from_account as account, sum(amount) as debits FROM
 
 CREATE VIEW balance AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account;
 
-CREATE VIEW total AS SELECT sum(balance) as total FROM balance;
+CREATE MATERIALIZED VIEW total AS SELECT sum(balance) as total FROM balance;
 
 -- TODO for the rest
 
@@ -29,15 +29,6 @@ CREATE VIEW total AS SELECT sum(balance) as total FROM balance;
 
 -- CREATE VIEW total2(total) AS SELECT sum(balance) FROM balance2;
 
-CREATE TABLE total_sink (
-    total DOUBLE,
-    PRIMARY KEY (total) NOT ENFORCED
-) WITH (
-    'connector' = 'upsert-kafka',
-    'property-version' = 'universal',
-    'properties.bootstrap.servers' = 'localhost:9092',
-    'topic' = 'total',
-    'key.format' = 'json',
-    'value.format' = 'json',
-    'properties.group.id' = 'total_flink'
-);
+CREATE EXTERNAL STREAM total_s(raw string) SETTINGS type='kafka', brokers='broker:29092', topic='total_proton';
+
+CREATE MATERIALIZED VIEW total2 INTO total_s AS SELECT * FROM total;
