@@ -10,9 +10,9 @@ with (
 )
 row format json;
 create view accounts as select from_account as account from transactions union select to_account from transactions;
-create materialized view credits as select transactions.to_account as account, sum(transactions.amount) as credits from transactions left join accounts on transactions.to_account = accounts.account group by to_account;
-create materialized view debits as select transactions.from_account as account, sum(transactions.amount) as debits from transactions left join accounts on transactions.from_account = accounts.account group by from_account;
-create materialized view balance as select credits.account as account, credits - debits as balance from credits inner join debits on credits.account = debits.account;
+create view credits as select transactions.to_account as account, sum(transactions.amount) as credits from transactions left join accounts on transactions.to_account = accounts.account group by to_account;
+create view debits as select transactions.from_account as account, sum(transactions.amount) as debits from transactions left join accounts on transactions.from_account = accounts.account group by from_account;
+create view balance as select credits.account as account, credits - debits as balance from credits inner join debits on credits.account = debits.account;
 create materialized view total as select sum(balance) from balance;
 create sink total_sink from total
 with (

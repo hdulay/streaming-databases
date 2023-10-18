@@ -11,28 +11,28 @@ CREATE TABLE transactions (
     timestamp='ts',
     timestamp_format='yyyy-MM-dd HH:mm:ss.SSS'
 );
-CREATE TABLE accepted_transactions WITH (
-    kafka_topic='accepted_transactions',
-    value_format='json') AS
-SELECT
-    *
-FROM
-    transactions
-EMIT CHANGES;
+-- CREATE TABLE accepted_transactions WITH (
+--     kafka_topic='accepted_transactions',
+--     value_format='json') AS
+-- SELECT
+--     *
+-- FROM
+--     transactions
+-- EMIT CHANGES;
 
-CREATE TABLE outer_join WITH (
-    kafka_topic='outer_join',
-    value_format='json') AS
-SELECT
-    t1.id,
-    t2.id as other_id
-FROM
-    transactions as t1
-LEFT JOIN
-    accepted_transactions as t2
-ON
-    t1.id = t2.id
-EMIT CHANGES;
+-- CREATE TABLE outer_join WITH (
+--     kafka_topic='outer_join',
+--     value_format='json') AS
+-- SELECT
+--     t1.id,
+--     t2.id as other_id
+-- FROM
+--     transactions as t1
+-- LEFT JOIN
+--     accepted_transactions as t2
+-- ON
+--     t1.id = t2.id
+-- EMIT CHANGES;
 
 CREATE TABLE credits WITH (
     kafka_topic='credits',
