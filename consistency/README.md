@@ -1,5 +1,14 @@
 # Ch 6 - Consistency
 
+Consistency has become more of a concern as real-time analytics are becoming more popular. Depending on the stream processor you choose, you may get different results. You must know the level of consistency required before choosing.
+
+![alt](img/consistency.jpg)
+
+The diagram shows 3 bank accounts (1,2,3). They all start off with zero balance. Transactions are randomly created that transfers 1 dollar to another account. At any state, the sum of all accounts should be zero. 
+
+The transactions producer in this repository is randomly transferring money between 10 accounts.
+
+## Setup
 You will need to setup your environment. These instructions will use `homebrew` on MacOS to run Kafka
 
 ```bash
