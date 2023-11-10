@@ -8,18 +8,18 @@ ts TIMESTAMP(3)
     'connector' = 'kafka',
     'topic' = 'transactions',
     'properties.bootstrap.servers' = 'localhost:9092',
-    'properties.group.id' = 'transactions_flink',
+    'properties.group.id' = 'transactions_flinksql',
     'scan.startup.mode' = 'earliest-offset',
     'format' = 'json',
     'json.fail-on-missing-field' = 'true',
     'json.ignore-parse-errors' = 'false'
 );
 
-CREATE VIEW credits(account, credits) AS SELECT to_account as account, sum(amount) as credits FROM transactions GROUP BY to_account;
+CREATE VIEW credits(account, credits, ts) AS SELECT to_account as account, sum(amount) as credits, ts FROM transactions GROUP BY to_account, ts;
 
-CREATE VIEW debits(account, debits) AS SELECT from_account as account, sum(amount) as debits FROM transactions GROUP BY from_account;
+CREATE VIEW debits(account, debits, ts) AS SELECT from_account as account, sum(amount) as debits, ts FROM transactions GROUP BY from_account, ts;
 
-CREATE VIEW balance(account, balance) AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account;
+CREATE VIEW balance(account, balance) AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account and credits.ts = debits.ts;
 
 CREATE VIEW total(total) AS SELECT sum(balance) FROM balance;
 
@@ -37,13 +37,3 @@ CREATE TABLE total_sink (
 );
 
 INSERT INTO total_sink SELECT * FROM total;
-
-DROP VIEW total;
-
-DROP VIEW balance;
-
-DROP VIEW debits;
-
-DROP VIEW credits;
-
-DROP TABLE transactions;

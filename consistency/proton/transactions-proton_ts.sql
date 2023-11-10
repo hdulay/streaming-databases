@@ -5,11 +5,11 @@ CREATE VIEW transactions AS
            raw:amount::double as amount, raw:ts::datetime64 as ts
     FROM transactions_s;
 
-CREATE VIEW credits AS SELECT to_account as account, sum(amount) as credits FROM transactions GROUP BY to_account;
+CREATE VIEW credits AS SELECT to_account as account, sum(amount) as credits, ts FROM transactions GROUP BY to_account, ts;
 
-CREATE VIEW debits AS SELECT from_account as account, sum(amount) as debits FROM transactions GROUP BY from_account;
+CREATE VIEW debits AS SELECT from_account as account, sum(amount) as debits, ts FROM transactions GROUP BY from_account, ts, ts;
 
-CREATE VIEW balance AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account;
+CREATE VIEW balance AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account AND credits.ts = debits.ts;
 
 CREATE MATERIALIZED VIEW total AS SELECT sum(balance) as total FROM balance;
 

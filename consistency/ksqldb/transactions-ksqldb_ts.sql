@@ -17,23 +17,29 @@ CREATE TABLE credits WITH (
     value_format='json') AS
 SELECT
     to_account AS account, 
-    sum(amount) AS credits
+    sum(amount) AS credits,
+    ts
 FROM
     transactions
 GROUP BY
-    to_account
+    to_account, ts
 EMIT CHANGES;
+-- Key format does not support schema.
+-- format: KAFKA
+-- schema: Persistence{columns=[`ACCOUNT` INTEGER KEY, `TS` STRING KEY], features=[]}
+-- reason: The 'KAFKA' format only supports a single field. Got: [`ACCOUNT` INTEGER KEY, `TS` STRING KEY]
 
 CREATE TABLE debits WITH (
     kafka_topic='debits',
     value_format='json') AS
 SELECT
     from_account AS account, 
-    sum(amount) AS debits
+    sum(amount) AS debits,
+    ts
 FROM
     transactions
 GROUP BY
-    from_account
+    from_account, ts
 EMIT CHANGES;
 
 CREATE TABLE balance WITH (
@@ -47,7 +53,7 @@ FROM
 INNER JOIN
     debits
 ON
-    credits.account = debits.account
+    credits.account = debits.account AND credits.ts = debits.ts
 EMIT CHANGES;
 
 CREATE TABLE total WITH (
