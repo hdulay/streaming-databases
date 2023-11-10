@@ -19,7 +19,7 @@ CREATE VIEW credits(account, credits, ts) AS SELECT to_account as account, sum(a
 
 CREATE VIEW debits(account, debits, ts) AS SELECT from_account as account, sum(amount) as debits, ts FROM transactions GROUP BY from_account, ts;
 
-CREATE VIEW balance(account, balance) AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account and credits.ts = debits.ts;
+CREATE VIEW balance(account, balance) AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account AND credits.ts = debits.ts;
 
 CREATE VIEW total(total) AS SELECT sum(balance) FROM balance;
 
