@@ -5,7 +5,7 @@ CREATE TABLE transactions (
     amount DOUBLE,
     ts VARCHAR
 ) WITH (
-    kafka_topic='transactions', 
+    kafka_topic='transactions',
     value_format='json', 
     partitions=1,
     timestamp='ts',
@@ -17,8 +17,7 @@ CREATE TABLE credits WITH (
     value_format='json') AS
 SELECT
     to_account AS account, 
-    sum(amount) AS credits,
-    ts
+    sum(amount) AS credits
 FROM
     transactions
 GROUP BY
