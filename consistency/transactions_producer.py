@@ -1,7 +1,6 @@
-import random
-import json
-
 import datetime
+import json
+import random
 import time
 from kafi.kafi import Cluster
 
