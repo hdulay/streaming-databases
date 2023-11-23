@@ -1,7 +1,4 @@
-import datetime
-import json
-import random
-import time
+import datetime, json, random, time
 from kafi.kafi import Cluster
 
 c = Cluster("local")
@@ -16,13 +13,9 @@ for id_int in range(0, 10000):
         "amount": 1,
         "ts": datetime.datetime.now().isoformat(sep=" ", timespec="milliseconds")
     })
-  #
   print(row_str)
   p.produce(row_str, key=str(id_int))
-  #
   if id_int % 1000 == 0:
     p.flush()
-  #
   time.sleep(0.01)
-#
 p.close()
