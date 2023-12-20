@@ -1,22 +1,21 @@
-CREATE EXTERNAL STREAM transactions_s(raw string) SETTINGS type='kafka', brokers='broker:29092', topic='transactions';
+CREATE EXTERNAL STREAM transactions(
+    id int,
+    from_account int,
+    to_account int,
+    amount int,
+    ts datetime64) 
+SETTINGS type='kafka', brokers='broker:29092', topic='transactions', data_format='JSONEachRow';
 
-CREATE VIEW transactions AS 
-    SELECT raw:id::int as id, raw:from_account::int as from_account, raw:to_account::int as to_account, 
-           raw:amount::double as amount, raw:ts::datetime64 as ts
-    FROM transactions_s;
+CREATE VIEW credits AS SELECT now64() as ts, to_account as account, sum(amount) as credits FROM transactions GROUP BY to_account EMIT PERIODIC 100ms;
 
-CREATE VIEW credits AS SELECT to_account as account, sum(amount) as credits FROM transactions GROUP BY to_account;
+CREATE VIEW debits AS SELECT now64() as ts, from_account as account, sum(amount) as debits FROM transactions GROUP BY from_account EMIT PERIODIC 100ms;
 
-CREATE VIEW debits AS SELECT from_account as account, sum(amount) as debits FROM transactions GROUP BY from_account;
+CREATE VIEW balance AS SELECT c.account, credits - debits as balance FROM changelog(credits,account,ts, true) AS c JOIN changelog(debits,account,ts, true) AS d ON c.account = d.account;
 
-CREATE VIEW balance AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account;
+-- make sure total_proton topic is created before creatint this external stream
+CREATE EXTERNAL STREAM total_s(total int) SETTINGS type='kafka', brokers='broker:29092', topic='total_proton', data_format='JSONEachRow';
 
-CREATE MATERIALIZED VIEW total AS SELECT sum(balance) as total FROM balance;
-
--- CREATE EXTERNAL STREAM total_s(raw string) SETTINGS type='kafka', brokers='broker:29092', topic='total_proton';
-
--- CREATE MATERIALIZED VIEW total2 INTO total_s AS SELECT * FROM total;
--- Code: 48. DB::Exception: Received from localhost:8463. DB::Exception: MaterializedView doesn't support target storage is ExternalStream. (NOT_IMPLEMENTED)
+CREATE MATERIALIZED VIEW total INTO total_s AS SELECT sum(balance) as total FROM balance;
 
 DROP VIEW total;
 
@@ -26,6 +25,6 @@ DROP VIEW debits;
 
 DROP VIEW credits;
 
-DROP VIEW transactions;
+DROP STREAM transactions;
 
-DROP STREAM transactions_s;
+DROP STREAM total_s;
