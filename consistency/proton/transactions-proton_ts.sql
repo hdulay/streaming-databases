@@ -11,12 +11,10 @@ CREATE VIEW debits AS SELECT from_account as account, sum(amount) as debits, ts 
 
 CREATE VIEW balance AS SELECT credits.account, credits - debits as balance FROM credits, debits WHERE credits.account = debits.account AND credits.ts = debits.ts;
 
-CREATE MATERIALIZED VIEW total AS SELECT sum(balance) as total FROM balance;
+-- make sure total_proton topic is created before creatint this external stream
+CREATE EXTERNAL STREAM total_s(total int) SETTINGS type='kafka', brokers='broker:29092', topic='total_proton', data_format='JSONEachRow';
 
--- CREATE EXTERNAL STREAM total_s(raw string) SETTINGS type='kafka', brokers='broker:29092', topic='total_proton';
-
--- CREATE MATERIALIZED VIEW total2 INTO total_s AS SELECT * FROM total;
--- Code: 48. DB::Exception: Received from localhost:8463. DB::Exception: MaterializedView doesn't support target storage is ExternalStream. (NOT_IMPLEMENTED)
+CREATE MATERIALIZED VIEW total INTO total_s AS SELECT sum(balance) as total FROM balance;
 
 DROP VIEW total;
 
@@ -26,6 +24,6 @@ DROP VIEW debits;
 
 DROP VIEW credits;
 
-DROP VIEW transactions;
+DROP STREAM transactions;
 
-DROP STREAM transactions_s;
+DROP STREAM total_s;
