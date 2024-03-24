@@ -21,20 +21,20 @@ start-cluster.sh
 
 ## Step 3
 
-Run sql-client.sh. Make sure to have put a matching version of the Flink SQL Connector JAR (e.g. for 1.17.1 - flink-sql-connector-kafka-3.0.0.jar) into the lib directory of the local Flink installation:  
+Run sql-client.sh. Make sure to have put a matching version of the Flink SQL Connector JAR (e.g. for 1.19.0 - flink-sql-connector-kafka-3.1.0.jar) into the lib directory of the local Flink installation:  
 ```
 sql-client.sh -l lib
 ```
 
 ## Step 4
 
-Make sure to create the two topics ``transactions`` and ``total_flinksql`` before the next step.
+Make sure to (re-)create the two topics ``transactions`` and ``total_flinksql`` before the next step.
 
-Then, paste the contents of ``transactions-flinksql.sql`` into the SQL Client (one by one, unfortunately).
+Then, either paste the contents of ``transactions-flinksql.sql`` into the SQL Client (one by one, unfortunately), or feed the ``*.sql`` file like so: ``sql-client.sh -l lib -f transactions-flinksql.sql``.
 
 Start the generator (``transactions-producer.py``).
 
-As long as new messages enter the source topic ``transactions``, the sink topic ``total_flink`` will contain (a lot of) messages with all kinds of totals:
+As long as new messages enter the source topic ``transactions``, the sink topic ``total_flink`` will be filled with messages containing the totals. The number of messages depends on the minibatch config (since Flink 1.19):
 ```
 [{"total": 0.0}, {"total": 0.0}, {"total": 1.0}, {"total": 1.0}, {"total": -1.0}, ...]
 ```
@@ -43,3 +43,5 @@ Once you stop new messages from arriving in ``transactions``, you get the correc
 ```
 {"total": 0.0}
 ```
+
+NB: Do not forget to either change the consumer group name for the source topic or restart the Flink cluster between experiments, otherwise you won't get any results/totals ;-)

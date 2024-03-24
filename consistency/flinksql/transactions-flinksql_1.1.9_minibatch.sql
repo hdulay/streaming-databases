@@ -2,7 +2,15 @@ SET 'table.exec.mini-batch.enabled' = 'true';
 
 SET 'table.exec.mini-batch.allow-latency' = '5S';
 
-SET 'table.exec.mini-batch.size' = '5000';
+SET 'table.exec.mini-batch.size' = '50';
+-- no mini batching: 77319
+-- 1: 77319
+-- 10: 403
+-- 20: 49
+-- 50: 1
+-- 50 ooo: 1
+-- 100: 1
+-- 5000: 1
 
 CREATE TABLE transactions (
 id  BIGINT,
@@ -44,12 +52,12 @@ CREATE TABLE total_sink (
 
 INSERT INTO total_sink SELECT * FROM total;
 
-DROP VIEW total;
+-- DROP VIEW total;
 
-DROP VIEW balance;
+-- DROP VIEW balance;
 
-DROP VIEW debits;
+-- DROP VIEW debits;
 
-DROP VIEW credits;
+-- DROP VIEW credits;
 
-DROP TABLE transactions;
+-- DROP TABLE transactions;
